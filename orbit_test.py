@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from orbit_classes_old import N_body_orbit
+from orbit_classes import N_body_orbit
 
 n = -1
 k = -3.

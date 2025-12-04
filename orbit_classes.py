@@ -90,8 +90,8 @@ class N_body_orbit:
             phi_dot_half = self.ang_mom / (self.mu * r[:, i]**2)
             phi[:, i+1] = phi[:, i] + phi_dot_half * delta_t
 
-            yplus = np.array([r[:, i+1], r_dot[:, i+1], phi[:, i+1]]).T
-            r_dot[:, i+1] = r_dot_half[:, i] + self.dy_dt(t_pts[i], yplus)[1] * (delta_t/2)
+            a_new = -1./self.mu * self.Ueff_deriv(r[:,i+1]) # get the new acceleration before updating r_dot
+            r_dot[:, i+1] = r_dot_half[:, i] + a_new * (delta_t/2)
         return r, r_dot, phi
 
     # get the energy of the system
