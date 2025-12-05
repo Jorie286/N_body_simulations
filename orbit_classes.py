@@ -60,7 +60,7 @@ class N_body_orbit:
         t : float
             time
         y : float
-            3-component vector with y[0] = r(t), y[1] = dr/dt, y[2] = dphi/dt
+            3-component vector with y[0] = r(t), y[1] = dr/dt, y[2] = phi(t)
 
         """
         y=np.array(y)
@@ -87,11 +87,11 @@ class N_body_orbit:
             y = np.array([r[:,i], r_dot[:, i], phi[:, i]]).T
             r_dot_half[:, i] = r_dot[:, i] + self.dy_dt(t_pts[i], y)[1] * (delta_t/2)
             r[:, i+1] = r[:, i] + r_dot_half[:, i] * delta_t
-            phi_dot_half = self.ang_mom / (self.mu * r[:, i]**2)
-            phi[:, i+1] = phi[:, i] + phi_dot_half * delta_t
+            phi[:, i+1] = phi[:, i] + self.dy_dt(t_pts, y)[2] * delta_t
 
             a_new = -1./self.mu * self.Ueff_deriv(r[:,i+1]) # get the new acceleration before updating r_dot
             r_dot[:, i+1] = r_dot_half[:, i] + a_new * (delta_t/2)
+
         return r, r_dot, phi
 
     # get the energy of the system
