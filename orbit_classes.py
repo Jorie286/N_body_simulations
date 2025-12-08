@@ -8,46 +8,72 @@ class N_body_orbit:
     """
     Equations of motion for a three body gravitational system with equal masses.
     """
-    def __init__(self, ang_mom, m, n=-1, k=1, mu=1):
+    def __init__(self, ang_mom, m, n=-1, k=-1, mu=1):
         self.ang_mom = ang_mom
         self.m = m # mass of a body in the system (assume they are all the same to simplify the problem)
         self.n = n
         self.k = k
         self.mu = mu
 
-    def U(self, r):
+    def U(self, r, phi):
         """Potential energy of the form U = kr^n."""
         U_tot = 0
         for i in range(len(r)-1):
-            U_i = self.k * np.abs(r[i] - r[i+1])**self.n
+            x_i, y_i = r[i]*np.cos(phi[i]), r[i]*np.sin(phi[i]) # find the distance between each set of bodies
+            x_ip1, y_ip1 = r[i+1]*np.cos(phi[i+1]), r[i+1]*np.sin(phi[i+1])
+
+            d = np.sqrt(((x_i-x_ip1)**2) + ((y_i-x_ip1)**2))
+
+            U_i = self.k * np.abs(d)**self.n
             U_tot += U_i
+
+        # find the looped potential
+        x_0, y_0 = r[0]*np.cos(phi[0]), r[0]*np.sin(phi[0])
+        x_fin, y_fin = r[-1]*np.cos(phi[-1]), r[-1]*np.sin(phi[-1])
+
+        d = np.sqrt(((x_fin - x_0)**2) + ((y_fin - y_0)**2))
+
+        U_tot += self.k * np.abs(d)**self.n
         return U_tot
 
     # get the central and effective energy
     def Ucf(self, r):
         """Centrifugal potential energy"""
-        return self.ang_mom**2 / (2. * self.mu * (sum([self.m * r[i] for i in range(len(r)-1)])/(self.m**(len(r))))**2)
+        return self.ang_mom**2 / (2. * self.mu * r**2)
 
     def Ueff(self, r):
         """Effective potential energy"""
         return self.U(r) + self.Ucf(r)
 
-    def U_deriv(self, r):
+    def U_deriv(self, r, phi):
         """dU/dr"""
         U_deriv_tot = 0
         for i in range(len(r)-1):
-            U_deriv_i = self.n * self.k * (r[i] - r[i+1]) * np.abs(r[i] - r[i+1])**(self.n - 1)
+            x_i, y_i = r[i]*np.cos(phi[i]), r[i]*np.sin(phi[i]) # find the distance between each set of bodies
+            x_ip1, y_ip1 = r[i+1]*np.cos(phi[i+1]), r[i+1]*np.sin(phi[i+1])
+
+            d = np.sqrt(((x_i-x_ip1)**2) + ((y_i-x_ip1)**2))
+
+            U_deriv_i = self.n * self.k * np.abs(d) * np.abs(d)**(self.n - 1)
             U_deriv_tot += U_deriv_i
+
+        # find the looped potential
+        x_0, y_0 = r[0]*np.cos(phi[0]), r[0]*np.sin(phi[0])
+        x_fin, y_fin = r[-1]*np.cos(phi[-1]), r[-1]*np.sin(phi[-1])
+
+        d = np.sqrt(((x_fin - x_0)**2) + ((y_fin - y_0)**2))
+
+        U_deriv_tot += self.n * self.k * np.abs(d) * np.abs(d)**(self.n - 1)
         return U_deriv_tot
 
     # get the derivative of the central and effective energy
     def Ucf_deriv(self, r):
         """dU_cf/dr"""
-        return -2. * self.ang_mom**2 / (2. * self.mu * (sum([self.m * r[i] for i in range(len(r)-1)])/(self.m**(len(r))))**3)
+        return -2. * self.ang_mom**2 / (2. * self.mu * r**3)
 
-    def Ueff_deriv(self, r):
+    def Ueff_deriv(self, r, phi):
         """dU_eff/dr"""
-        return self.U_deriv(r) + self.Ucf_deriv(r)
+        return self.U_deriv(r, phi) + self.Ucf_deriv(r)
 
     # the differential equation
     def dy_dt(self, t, y):
@@ -65,7 +91,7 @@ class N_body_orbit:
         """
         y=np.array(y)
         return [ y[:,1],
-                -1./self.mu * self.Ueff_deriv(y[:,0]),
+                -1./self.mu * self.Ueff_deriv(y[:,0], y[:,2]),
                 self.ang_mom / (self.mu * y[:,0]**2) ]
 
     # integrate over the differential equation and return the final results
@@ -89,7 +115,7 @@ class N_body_orbit:
             r[:, i+1] = r[:, i] + r_dot_half[:, i] * delta_t
             phi[:, i+1] = phi[:, i] + self.dy_dt(t_pts, y)[2] * delta_t
 
-            a_new = -1./self.mu * self.Ueff_deriv(r[:,i+1]) # get the new acceleration before updating r_dot
+            a_new = -1./self.mu * self.Ueff_deriv(r[:,i+1], phi[:,i+1]) # get the new acceleration before updating r_dot
             r_dot[:, i+1] = r_dot_half[:, i] + a_new * (delta_t/2)
 
         return r, r_dot, phi

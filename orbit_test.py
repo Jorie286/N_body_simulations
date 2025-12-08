@@ -16,20 +16,17 @@ delta_t = 0.01
 t_pts = np.arange(t_start, t_end+delta_t, delta_t)
 
 # Initial conditions
-r_0 = np.array([1.001, -1.002, -0.5])
-r_dot_0 = np.array([0.0, 0.0, 0.0])
+r_0 = np.array([1.0, 1.0, 1.0])
+r_dot_0 = np.array([-0.01, -0.01, -0.01])
 
 deg_2_rad = np.pi/180
-phi_0 = np.array([0.0, 0.0, 0.0])
+phi_0 = np.array([0.0, 120.0*deg_2_rad, -120.0*deg_2_rad])
+
+# integrate the orbits
 r_pts_l, r_dot_pts_l, phi_pts_l = o1.solve_leapfrog(t_pts, delta_t, r_0, r_dot_0, phi_0)
 
-c = o1.ang_mom**2 / (np.abs(o1.k) * o1.mu)
-epsilon = c / r_0 - 1.
-energy_0 = o1.mu/2. * r_dot_0**2 + o1.Ueff(r_0)
 
-# print(f'energy = {energy_0:.2f}')
-# print(f'eccentricity = {epsilon:.2f}')
-
+# plot the orbits
 fig_4 = plt.figure(figsize=(8,8))
 
 overall_title = 'Gravitational orbit:  ' + \
@@ -83,7 +80,7 @@ ax_4d.plot(phi_pts_l[0,:], r_pts_l[0,:], color='blue', label = "Leapfrog")
 ax_4d.plot(phi_pts_l[1,:], r_pts_l[1,:], color='red', label = "Leapfrog")
 ax_4d.plot(phi_pts_l[2,:], r_pts_l[2,:], color='green', label = "Leapfrog")
 ax_4d.set_title('Polar plot', pad=20.)
-#ax_4d.set_ylim(0,4)
+ax_4d.set_ylim(0,4)
 
 fig_4.tight_layout()
 
