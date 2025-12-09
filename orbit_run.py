@@ -15,6 +15,7 @@ o1 = N_body_orbit(ang_mom, m, n=n, k=k, mu=0.5)
 t_start = 0.
 t_end = 10.
 delta_t = 0.01
+deg_2_rad = np.pi/180
 
 t_pts = np.arange(t_start, t_end+delta_t, delta_t)
 
@@ -22,38 +23,44 @@ t_pts = np.arange(t_start, t_end+delta_t, delta_t)
 @dataclass
 class ThreeBodyButterflyI:
     r_0 = [1.000001, -1.000002, 0.000003]
-    x_1: float = 0.30689
-    x_2: float = x_1
-    x_3: float = -2*x_1
-    y_1: float = 0.12551
-    y_2: float = y_1
-    y_3: float = -2*y_1
+    xdot_1: float = 0.30689
+    xdot_2: float = x_1
+    xdot_3: float = -2*x_1
+    ydot_1: float = 0.12551
+    ydot_2: float = y_1
+    ydot_3: float = -2*y_1
     r_dot_0 = [np.sqrt((x_1**2)+(y_1**2)), np.sqrt((x_2**2)+(y_2**2)), np.sqrt((x_3**2)+(y_3**2))]
     phi_0 = [0.0, 0.0, 0.0]
 
 @dataclass
 class ThreeBodyButterflyII:
     r_0 = [1.000001, -1.000002, 0.000003]
-    x_1: float = 0.39295
-    x_2: float = x_1
-    x_3: float = -2*x_1
-    y_1: float = 0.09758
-    y_2: float = y_1
-    y_3: float = -2*y_1
+    xdot_1: float = 0.39295
+    xdot_2: float = x_1
+    xdot_3: float = -2*x_1
+    ydot_1: float = 0.09758
+    ydot_2: float = y_1
+    ydot_3: float = -2*y_1
     r_dot_0 = [np.sqrt((x_1**2)+(y_1**2)), np.sqrt((x_2**2)+(y_2**2)), np.sqrt((x_3**2)+(y_3**2))]
     phi_0 = [0.0, 0.0, 0.0]
 
 @dataclass
 class ThreeBodyBumblebee:
     r_0 = [1.000001, -1.000002, 0.000003]
-    x_1: float = 0.18428
-    x_2: float = x_1
-    x_3: float = -2*x_1
-    y_1: float = 0.58719
-    y_2: float = y_1
-    y_3: float = -2*y_1
+    xdot_1: float = 0.18428
+    xdot_2: float = x_1
+    xdot_3: float = -2*x_1
+    ydot_1: float = 0.58719
+    ydot_2: float = y_1
+    ydot_3: float = -2*y_1
     r_dot_0 = [np.sqrt((x_1**2)+(y_1**2)), np.sqrt((x_2**2)+(y_2**2)), np.sqrt((x_3**2)+(y_3**2))]
     phi_0 = [0.0, 0.0, 0.0]
+
+@dataclass
+class test_conditions:
+    r_0 = np.array([1.0, 1.0, 1.0])
+    r_dot_0 = np.array([-0.01, -0.01, -0.01])
+    phi_0 = np.array([0.0, 120.0*deg_2_rad, -120.0*deg_2_rad])
 
 def get_orbit(r_0, r_dot_0, phi_0):
     """
@@ -73,7 +80,7 @@ def get_orbit(r_0, r_dot_0, phi_0):
     return r_pts, r_dot_pts, phi_pts
 
 # get the names of all stable orbits defined above
-orbits = [ThreeBodyButterflyI, ThreeBodyButterflyII, ThreeBodyBumblebee]
+orbits = [ThreeBodyButterflyI, ThreeBodyButterflyII, ThreeBodyBumblebee, test_conditions]
 for orbit_name in orbits:
     # run the orbit integrator
     r_pts, r_dot_pts, phi_pts = get_orbit(orbit_name.r_0, orbit_name.r_dot_0, orbit_name.phi_0)
