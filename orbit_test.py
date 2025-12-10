@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from orbit_classes import N_body_orbit
+from orbit_classes import N_body_orbit_polar
 
 n = -1
 k = -3.
 ang_mom = 1.
 m = 1.
-o1 = N_body_orbit(ang_mom, m, n=n, k=k, mu=0.5)
+mu = 0.5
+o1 = N_body_orbit_polar(ang_mom, m, n=n, k=k, mu=mu)
 
 # Plotting time
 t_start = 0.
@@ -16,14 +17,15 @@ delta_t = 0.01
 t_pts = np.arange(t_start, t_end+delta_t, delta_t)
 
 # Initial conditions
-r_0 = np.array([1.0, 1.0, 1.0])
-r_dot_0 = np.array([-0.01, -0.01, -0.01])
+r_0 = np.array([1.0, 1.0, 1.0, 1.0, 1.0])
+r_dot_0 = np.array([-0.01, -0.01, -0.01, -0.01, -0.01])
 
 deg_2_rad = np.pi/180
-phi_0 = np.array([0.0, 120.0*deg_2_rad, -120.0*deg_2_rad])
+phi_0 = np.array([0.0, 72.0*deg_2_rad, -72.0*deg_2_rad, 144.0*deg_2_rad, -144.0*deg_2_rad])
+phi_dot_0 = ang_mom / (mu * r_0**2)
 
 # integrate the orbits
-r_pts_l, r_dot_pts_l, phi_pts_l = o1.solve_leapfrog(t_pts, delta_t, r_0, r_dot_0, phi_0)
+r_pts_l, r_dot_pts_l, phi_pts_l, phi_dot_l = o1.solve_leapfrog(t_pts, delta_t, r_0, r_dot_0, phi_0, phi_dot_0)
 
 
 # plot the orbits
@@ -43,7 +45,7 @@ ax_4c = fig_4.add_subplot(1,1,1)
 ax_4c.plot(r_pts_l[0,:]*np.cos(phi_pts_l[0,:]), r_pts_l[0,:]*np.sin(phi_pts_l[0,:]), color='blue', label = "Leapfrog")
 ax_4c.plot(r_pts_l[1,:]*np.cos(phi_pts_l[1,:]), r_pts_l[1,:]*np.sin(phi_pts_l[1,:]), color='red', label = "Leapfrog")
 ax_4c.plot(r_pts_l[2,:]*np.cos(phi_pts_l[2,:]), r_pts_l[2,:]*np.sin(phi_pts_l[2,:]), color='green', label = "Leapfrog")
-#ax_4c.plot(r_pts_l[3,:]*np.cos(phi_pts_l[3,:]), r_pts_l[3,:]*np.sin(phi_pts_l[3,:]), color='green', label = "Leapfrog")
+ax_4c.plot(r_pts_l[3,:]*np.cos(phi_pts_l[3,:]), r_pts_l[3,:]*np.sin(phi_pts_l[3,:]), color='k', label = "Leapfrog")
 ax_4c.set_xlabel(r'$x$')
 ax_4c.set_ylabel(r'$y$')
 ax_4c.set_aspect(1)
@@ -79,6 +81,7 @@ for i, l in enumerate(r_pts_l): # fix any negative radii so that they don't inte
 ax_4d.plot(phi_pts_l[0,:], r_pts_l[0,:], color='blue', label = "Leapfrog")
 ax_4d.plot(phi_pts_l[1,:], r_pts_l[1,:], color='red', label = "Leapfrog")
 ax_4d.plot(phi_pts_l[2,:], r_pts_l[2,:], color='green', label = "Leapfrog")
+ax_4d.plot(phi_pts_l[3,:], r_pts_l[3,:], color='k', label = "Leapfrog")
 ax_4d.set_title('Polar plot', pad=20.)
 ax_4d.set_ylim(0,4)
 
