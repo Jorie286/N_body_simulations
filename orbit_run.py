@@ -61,7 +61,7 @@ class ThreeBodyButterflyII:
 
 @dataclass
 class ThreeBodyBumblebee:
-    x_0 = np.array([1.0, -1.0, 0.0])
+    x_0 = np.array([2.0, -2.0, 0.0])
     y_0 = np.array([0.0, 0.0, 0.0])
     xdot_1: float = 0.18428
     xdot_2: float = xdot_1
@@ -82,14 +82,14 @@ class ThreeBodyBumblebee:
 @dataclass
 class threebody_flower:
     r_0 = np.array([1.0, 1.0, 1.0])
-    r_dot_0 = np.array([-0.01, -0.01, -0.01])
+    r_dot_0 = np.array([0.0, 0.0, 0.0])
     phi_0 = np.array([0.0, 120.0*deg_2_rad, -120.0*deg_2_rad])
-    phi_dot_0 = ang_mom / (0.5 * r_0**2)
+    phi_dot_0 = np.array([20.0, 20.0, 20.0]) #ang_mom / (0.5 * r_0**2)
 
 @dataclass
 class fourbody_flower:
     r_0 = np.array([1.0, 1.0, 1.0, 1.0])
-    r_dot_0 = np.array([-0.01, -0.01, -0.01, -0.01])
+    r_dot_0 = np.array([0.0, 0.0, 0.0, 0.0])
     phi_0 = np.array([0.0, 90.0*deg_2_rad, -90.0*deg_2_rad, 180.0*deg_2_rad])
     phi_dot_0 = ang_mom / (0.5 * r_0**2)
 
@@ -118,7 +118,7 @@ class fourbody_limax:
 @dataclass
 class fivebody_flower:
     r_0 = np.array([1.0, 1.0, 1.0, 1.0, 1.0])
-    r_dot_0 = np.array([-0.01, -0.01, -0.01, -0.01, -0.01])
+    r_dot_0 = np.array([0.0, 0.0, 0.0, 0.0, 0.0])
     phi_0 = np.array([0.0, 72.0*deg_2_rad, -72.0*deg_2_rad, 144.0*deg_2_rad, -144.0*deg_2_rad])
     phi_dot_0 = ang_mom / (0.5 * r_0**2)
 
@@ -142,7 +142,7 @@ def get_orbit_polar(r_0, r_dot_0, phi_0, phi_dot_0):
 # get the names of all stable orbits defined above
 #orbits = [ThreeBodyButterflyI, ThreeBodyButterflyII, ThreeBodyBumblebee, threebody_flower, fourbody_flower, fourbody_limax,
          #fivebody_flower]
-orbits = [ThreeBodyBumblebee]
+orbits = [ThreeBodyBumblebee, threebody_flower, ThreeBodyButterflyI]
 for orbit_name in orbits:
     # run the orbit integrator
     r_pts, r_dot_pts, phi_pts, phi_dot_pts = get_orbit_polar(orbit_name.r_0, orbit_name.r_dot_0, orbit_name.phi_0, orbit_name.phi_dot_0)

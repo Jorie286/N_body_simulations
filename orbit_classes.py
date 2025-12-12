@@ -37,16 +37,30 @@ class N_body_orbit_polar:
         return U_tot
 
     # get the central and effective energy
-    def Ucf(self, r):
+    def Ucf(self, r, phi):
         """Centrifugal potential energy"""
-        U_cf = []
-        for i, value in enumerate(r):
-            U_cf[i] = self.ang_mom**2 / (2. * self.mu * (value + 0.5)**2)  # add a small number to avoid division by zero
-        return np.array(U_cf)
+        U_cf = np.zeros_like(r)
+        for i in range(len(r)-1):
+            x_i, y_i = r[i]*np.cos(phi[i]), r[i]*np.sin(phi[i]) # find the distance between each set of bodies
+            x_ip1, y_ip1 = r[i+1]*np.cos(phi[i+1]), r[i+1]*np.sin(phi[i+1])
+
+            d = np.sqrt(((x_i-x_ip1)**2) + ((y_i-y_ip1)**2))
+
+            U_cf[i] = self.ang_mom**2 / (2. * self.mu * (d**2))
+
+        # find the looped potential
+        x_0, y_0 = r[0]*np.cos(phi[0]), r[0]*np.sin(phi[0])
+        x_fin, y_fin = r[-1]*np.cos(phi[-1]), r[-1]*np.sin(phi[-1])
+
+        d = np.sqrt(((x_fin - x_0)**2) + ((y_fin - y_0)**2))
+
+        U_cf[-1] = self.ang_mom**2 / (2. * self.mu * (d**2))
+        
+        return U_cf
 
     def Ueff(self, r, phi):
         """Effective potential energy"""
-        return self.U(r, phi) + self.Ucf(r)
+        return self.U(r, phi) + self.Ucf(r, phi)
 
     def U_deriv(self, r, phi):
         """dU/dr"""
@@ -70,16 +84,30 @@ class N_body_orbit_polar:
         return U_deriv_tot
 
     # get the derivative of the central and effective energy
-    def Ucf_deriv(self, r):
+    def Ucf_deriv(self, r, phi):
         """dU_cf/dr"""
         Ucf_deriv = np.zeros_like(r)
-        for i, value in enumerate(r):
-            Ucf_deriv[i] = -2. * self.ang_mom**2 / (2. * self.mu * (value + 0.5)**3)  # add a small number to avoid division by zero
+        for i in range(len(r)-1):
+            x_i, y_i = r[i]*np.cos(phi[i]), r[i]*np.sin(phi[i]) # find the distance between each set of bodies
+            x_ip1, y_ip1 = r[i+1]*np.cos(phi[i+1]), r[i+1]*np.sin(phi[i+1])
+
+            d = np.sqrt(((x_i-x_ip1)**2) + ((y_i-y_ip1)**2))
+
+            Ucf_deriv[i] = -2. * self.ang_mom**2 / (2. * self.mu * (d**3))
+
+        # find the looped potential
+        x_0, y_0 = r[0]*np.cos(phi[0]), r[0]*np.sin(phi[0])
+        x_fin, y_fin = r[-1]*np.cos(phi[-1]), r[-1]*np.sin(phi[-1])
+
+        d = np.sqrt(((x_fin - x_0)**2) + ((y_fin - y_0)**2))
+
+        Ucf_deriv[-1] = -2. * self.ang_mom**2 / (2. * self.mu * (d**3))
+
         return Ucf_deriv
 
     def Ueff_deriv(self, r, phi):
         """dU_eff/dr"""
-        return self.U_deriv(r, phi) + self.Ucf_deriv(r)
+        return self.U_deriv(r, phi) + self.Ucf_deriv(r, phi)
 
     # the differential equation
     def dy_dt(self, t, y):
@@ -99,7 +127,7 @@ class N_body_orbit_polar:
         return [ y[:,1],
                 -1./self.mu * self.Ueff_deriv(y[:,0], y[:,2]),
                 y[:, 3],
-                self.Ucf_deriv(y[:, 0]) ]
+                self.Ucf_deriv(y[:, 0], y[:, 2]) ]
 
     # integrate over the differential equation and return the final results
     def solve_leapfrog(self, t_pts, delta_t, r_0, r_dot_0, phi_0, phi_dot_0):
@@ -131,7 +159,7 @@ class N_body_orbit_polar:
             a_new = -1./self.mu * self.Ueff_deriv(r[:,i+1], phi[:,i+1]) # get the new acceleration before updating r_dot
             r_dot[:, i+1] = r_dot_half[:, i] + a_new * (delta_t/2)
 
-            a_phi_new = self.Ucf_deriv(r[:,i+1]) # get the new angular acceleration before updating phi_dot
+            a_phi_new = self.Ucf_deriv(r[:,i+1], phi[:,i+1]) # get the new angular acceleration before updating phi_dot
             phi_dot[:, i+1] = self.dy_dt(t_pts[i], y)[3] + a_phi_new * (delta_t/2)
 
         return r, r_dot, phi, phi_dot
