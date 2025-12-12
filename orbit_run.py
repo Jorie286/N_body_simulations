@@ -2,7 +2,6 @@ import numpy as np
 import sys
 from dataclasses import dataclass
 from orbit_classes import N_body_orbit_polar
-from orbit_classes import N_body_orbit_cartesian
 import pandas as pd
 
 # instantiate the orbit integrator
@@ -11,7 +10,6 @@ k = -3.
 ang_mom = 1.
 m = 1.
 o1_polar = N_body_orbit_polar(ang_mom, m, n=n, k=k, mu=0.5)
-o1_cart = N_body_orbit_cartesian(ang_mom, m, n=n, k=k, mu=0.5)
 
 # Plotting time
 t_start = 0.
